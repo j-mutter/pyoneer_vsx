@@ -4,6 +4,8 @@ import logging
 import re
 import time
 
+from math import ceil
+
 __all__ = ('AVR')
 _LOGGER = logging.getLogger(__name__)
 
@@ -253,15 +255,19 @@ class Receiver(asyncio.Protocol):
         try:
             return int(self._volume)
         except ValueError:
-            return -90
+            return 0
         except NameError:
-            return -90
+            return 0
 
     @raw_volume.setter
     def raw_volume(self, value):
         if isinstance(value, int) and 0 <= value <= 185:
             _LOGGER.debug('Setting raw_volume to '+str(value))
-            self.send_command('volume_set', str(value))
+            # It turns out that not all receivers support the `volume_set` command
+            # so we have to step up/down as needed until we hit our target.
+            #
+            # self.send_command('volume_set', str(value))
+            self._step_to_target_volume(value)
 
     @property
     def volume(self):
@@ -280,7 +286,7 @@ class Receiver(asyncio.Protocol):
     @volume.setter
     def volume(self, value):
         if isinstance(value, int) and 0 <= value <= 100:
-            self.raw_volume = self.volume_percent_to_raw_volume(value)
+            self.raw_volume = self.volume_percent_to_raw_volume(value / 100)
 
     @property
     def volume_as_percentage(self):
@@ -299,6 +305,26 @@ class Receiver(asyncio.Protocol):
             if 0 <= value <= 1:
                 value = self.volume_percent_to_raw_volume(value)
                 self.raw_volume = value
+
+    def volume_up(self):
+        self.send_command('volume_up')
+
+    def volume_down(self):
+        self.send_command('volume_down')
+
+    def _step_to_target_volume(self, target):
+        # The volume up/down commands step in increments of odd numbers only, resulting in a 1db increase/decrease with each step
+        actual_target = target + 1 if target % 2 == 0 else target
+        # it also skips 001, so treat that as 0
+        actual_target = 0 if actual_target < 3 else actual_target
+
+        steps = ceil(abs(actual_target - self.raw_volume) / 2)
+
+        for _ in range(steps):
+            if actual_target > self.raw_volume:
+                self.volume_up()
+            else:
+                self.volume_down()
 
     @property
     def power(self):

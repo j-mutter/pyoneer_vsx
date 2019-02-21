@@ -35,27 +35,39 @@ def test():
 
     yield from asyncio.sleep(2, loop=loop)
 
-    log.info('Power state is '+str(conn.protocol.power))
-    conn.protocol.power = True
+    log.info('Power state is '+str(conn.receiver.power))
+    conn.receiver.power = True
 
     yield from asyncio.sleep(2, loop=loop)
-    log.info('Power state is '+str(conn.protocol.power))
+    log.info('Power state is '+str(conn.receiver.power))
 
     yield from asyncio.sleep(2, loop=loop)
 
     log.info('Setting input by name to CD')
-    conn.protocol.input_name = 'CD'
+    conn.receiver.input_name = 'CD'
  
     yield from asyncio.sleep(2, loop=loop)
 
     log.info('Setting input by number to BD(25)')
-    conn.protocol.input_number = 25
+    conn.receiver.input_number = 25
 
     yield from asyncio.sleep(2, loop=loop)
 
-    conn.protocol.power = False
+    log.info('Setting volume to 50%')
+    conn.receiver.volume_as_percentage = 0.5
+
     yield from asyncio.sleep(2, loop=loop)
-    log.info('Power state is '+str(conn.protocol.power))
+    log.info('Volume is now ' + str(conn.receiver.volume))
+
+    log.info('Setting volume to 25')
+    conn.receiver.volume = 25
+
+    yield from asyncio.sleep(2, loop=loop)
+    log.info('Volume is now ' + str(conn.receiver.volume))
+
+    conn.receiver.power = False
+    yield from asyncio.sleep(2, loop=loop)
+    log.info('Power state is '+str(conn.receiver.power))
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
