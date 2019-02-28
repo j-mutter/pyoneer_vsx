@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyoneer_vsx",
-    version="0.0.2",
+    version="0.0.3",
     author="Justin Mutter",
     description="A python library to control Pioneer VSX AVRs over telnet",
     long_description=long_description,
