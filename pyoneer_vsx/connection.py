@@ -6,13 +6,6 @@ from .receiver import Receiver
 __all__ = ('Connection')
 _LOGGER = logging.getLogger(__name__)
 
-# In Python 3.4.4, `async` was renamed to `ensure_future`.
-try:
-    ensure_future = asyncio.ensure_future
-except AttributeError:
-    ensure_future = asyncio.async
-
-
 class Connection:
     """Connection handler to maintain network connection for AVR Protocol."""
 
@@ -68,7 +61,7 @@ class Connection:
         def connection_lost():
             """Function callback for Protocoal class when connection is lost."""
             if conn._auto_reconnect and not conn._closing:
-                ensure_future(conn._reconnect(), loop=conn._loop)
+                asyncio.ensure_future(conn._reconnect(), loop=conn._loop)
 
         conn.receiver = Receiver(
             connection_lost_callback=connection_lost, loop=conn._loop,

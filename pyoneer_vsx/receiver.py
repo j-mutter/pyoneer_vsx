@@ -9,12 +9,6 @@ from math import ceil
 __all__ = ('AVR')
 _LOGGER = logging.getLogger(__name__)
 
-# In Python 3.4.4, `async` was renamed to `ensure_future`.
-try:
-    ensure_future = asyncio.ensure_future
-except AttributeError:
-    ensure_future = asyncio.async
-
 COMMANDS = {
     'power_on': 'PO',
     'power_off': 'PF',
